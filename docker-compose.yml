@@ -21,6 +21,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: postgres
+      TZ: Europe/Kyiv  # order dates and monthly sales use local time
       DB_URL: jdbc:postgresql://db:5432/shoplite
       DB_USERNAME: shoplite
       DB_PASSWORD: ${DB_PASSWORD:-shoplite}
