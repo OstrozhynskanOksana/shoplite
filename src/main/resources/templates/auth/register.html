@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign up')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container auth-box">
+    <h1 class="h4 mb-3">Sign up</h1>
+    <form th:action="@{/register}" th:object="${form}" method="post" novalidate>
+        <div class="mb-3">
+            <label class="form-label" for="fullName">Name</label>
+            <input class="form-control" id="fullName" th:field="*{fullName}"
+                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{fullName}">Error</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" type="email" id="email" th:field="*{email}"
+                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{email}">Error</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="password">Password (at least 8 characters)</label>
+            <input class="form-control" type="password" id="password" th:field="*{password}"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{password}">Error</div>
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Sign up</button>
+    </form>
+    <p class="small mt-3">Already have an account? <a th:href="@{/login}">Log in</a></p>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
