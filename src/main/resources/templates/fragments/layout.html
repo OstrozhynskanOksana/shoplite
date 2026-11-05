@@ -23,7 +23,9 @@
                 <a class="btn btn-primary btn-sm" th:href="@{/register}">Sign up</a>
             </div>
             <div class="d-flex align-items-center gap-2" th:if="${currentUserEmail != null}">
-                <span class="small text-secondary" th:text="${currentUserEmail}">user@example.com</span>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/cart}">Cart</a>
+                <a class="btn btn-link btn-sm" th:href="@{/orders}">My orders</a>
+                <a class="btn btn-link btn-sm text-secondary" th:href="@{/profile}" th:text="${currentUserEmail}">user@example.com</a>
                 <form th:action="@{/logout}" method="post" class="m-0">
                     <button class="btn btn-outline-secondary btn-sm" type="submit">Log out</button>
                 </form>

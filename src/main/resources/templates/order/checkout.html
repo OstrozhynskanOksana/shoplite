@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Checkout')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">Checkout</h1>
+    <div class="row g-4">
+        <div class="col-12 col-md-6">
+            <form th:action="@{/checkout}" th:object="${form}" method="post" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="deliveryAddress">Delivery address</label>
+                    <textarea class="form-control" id="deliveryAddress" rows="3" th:field="*{deliveryAddress}"
+                              th:classappend="${#fields.hasErrors('deliveryAddress')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{deliveryAddress}">Error</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="phone">Phone</label>
+                    <input class="form-control" id="phone" th:field="*{phone}" placeholder="+380 67 123 4567"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{phone}">Error</div>
+                </div>
+                <p class="small text-secondary">Payment on delivery (cash or card to the courier).</p>
+                <button class="btn btn-primary" type="submit">Place order</button>
+                <a class="btn btn-link" th:href="@{/cart}">Back to cart</a>
+            </form>
+        </div>
+        <div class="col-12 col-md-6">
+            <h2 class="h6">Order summary</h2>
+            <ul class="list-group mb-2">
+                <li class="list-group-item d-flex justify-content-between" th:each="item : ${cart.items}">
+                    <span th:text="${item.product.name} + ' × ' + ${item.quantity}">Product × 1</span>
+                    <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</span>
+                </li>
+            </ul>
+            <p class="fw-semibold text-end">Total:
+                <span th:text="${#numbers.formatDecimal(cart.total, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</span></p>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
