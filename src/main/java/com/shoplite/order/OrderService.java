@@ -19,4 +19,10 @@ public interface OrderService {
 
     /** Order details for its owner; other users get "not found" (FR-09). */
     Order getForUser(Long orderId, Long userId);
+
+    /** All orders, or only those with the given status, newest first (FR-14). */
+    List<Order> findAll(OrderStatus status);
+
+    /** Order details for an administrator (FR-14). */
+    Order getById(Long orderId);
 }

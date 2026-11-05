@@ -93,6 +93,19 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> findAll(OrderStatus status) {
+        return status == null ? orderRepository.findAllByOrderByCreatedAtDesc()
+                : orderRepository.findByStatusOrderByCreatedAtDesc(status);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Order getById(Long orderId) {
+        return getOrder(orderId);
+    }
+
     private Order getOrder(Long orderId) {
         return orderRepository.findWithItemsById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
