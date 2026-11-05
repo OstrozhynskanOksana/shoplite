@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order #' + ${order.id} + ' — Admin')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <a th:href="@{/admin/orders}" class="small">← All orders</a>
+    <div class="d-flex align-items-center gap-3 mt-2 mb-3">
+        <h1 class="h4 mb-0" th:text="'Order #' + ${order.id}">Order #1</h1>
+        <span th:replace="~{fragments/status :: badge(${order.status})}"></span>
+    </div>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+    <div class="row g-4">
+        <div class="col-12 col-md-7">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Product</th><th class="text-end">Price</th><th class="text-end">Qty</th><th class="text-end">Subtotal</th></tr></thead>
+                    <tbody>
+                    <tr th:each="item : ${order.items}">
+                        <td th:text="${item.product.name}">Product</td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(item.priceAtPurchase, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                        <td class="text-end" th:text="${item.quantity}">1</td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="fw-semibold text-end">Total:
+                <span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</span></p>
+        </div>
+        <div class="col-12 col-md-5">
+            <p class="mb-1"><span class="text-secondary">Placed:</span>
+                <span th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</span></p>
+            <p class="mb-1"><span class="text-secondary">Customer:</span>
+                <span th:text="${order.user.fullName} + ' (' + ${order.user.email} + ')'">Name</span></p>
+            <p class="mb-1"><span class="text-secondary">Phone:</span> <span th:text="${order.phone}">phone</span></p>
+            <p class="mb-3"><span class="text-secondary">Delivery address:</span> <span th:text="${order.deliveryAddress}">address</span></p>
+            <h2 class="h6">Change status</h2>
+            <p th:if="${#lists.isEmpty(order.status.nextStatuses)}" class="small text-secondary">This order is closed.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <form th:each="next : ${order.status.nextStatuses}"
+                      th:action="@{/admin/orders/{id}/status(id=${order.id})}" method="post">
+                    <input type="hidden" name="status" th:value="${next.name()}">
+                    <button class="btn btn-sm" type="submit"
+                            th:classappend="${next.name() == 'CANCELLED'} ? 'btn-outline-danger' : 'btn-primary'"
+                            th:text="'Mark as ' + ${next.title}">Mark as Confirmed</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

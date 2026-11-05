@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Orders — Admin')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">Admin panel</h1>
+    <ul th:replace="~{fragments/admin :: nav('orders')}"></ul>
+    <form th:action="@{/admin/orders}" method="get" class="d-flex gap-2 mb-3" style="max-width: 360px">
+        <select class="form-select" name="status" aria-label="Status filter">
+            <option value="">All statuses</option>
+            <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.title}"
+                    th:selected="${s == selectedStatus}">New</option>
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">Filter</button>
+    </form>
+    <p th:if="${#lists.isEmpty(orders)}" class="text-secondary">No orders.</p>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(orders)}">
+        <table class="table align-middle">
+            <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Phone</th><th>Status</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${orders}">
+                <td><a th:href="@{/admin/orders/{id}(id=${o.id})}" th:text="'#' + ${o.id}">#1</a></td>
+                <td th:text="${#temporals.format(o.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                <td th:text="${o.user.email}">user@example.com</td>
+                <td th:text="${o.phone}">phone</td>
+                <td><span th:replace="~{fragments/status :: badge(${o.status})}"></span></td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(o.total, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

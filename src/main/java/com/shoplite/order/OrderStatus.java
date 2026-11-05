@@ -1,5 +1,7 @@
 package com.shoplite.order;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +31,11 @@ public enum OrderStatus {
 
     public String getTitle() {
         return title;
+    }
+
+    /** Statuses this one can move to, in display order. */
+    public List<OrderStatus> getNextStatuses() {
+        return Arrays.stream(values()).filter(this::canChangeTo).toList();
     }
 
     public boolean canChangeTo(OrderStatus next) {

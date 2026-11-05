@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Entity
+/** "Order" is a JPQL keyword, so the entity gets its own name for queries. */
+@Entity(name = "ShopOrder")
 @Table(name = "orders")
 public class Order {
 
