@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Categories — Admin')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">Admin panel</h1>
+    <ul th:replace="~{fragments/admin :: nav('categories')}"></ul>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+    <form th:action="@{/admin/categories}" method="post" class="d-flex gap-2 mb-3" style="max-width: 420px">
+        <input class="form-control" name="name" placeholder="New category name" maxlength="100" required aria-label="Category name">
+        <button class="btn btn-primary text-nowrap" type="submit">Add</button>
+    </form>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Name</th><th class="text-end">Products</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${categories}">
+                <td>
+                    <form th:action="@{/admin/categories/{id}/rename(id=${c.id})}" method="post" class="d-flex gap-2" style="max-width: 360px">
+                        <input class="form-control form-control-sm" name="name" th:value="${c.name}" maxlength="100" required aria-label="Category name">
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">Rename</button>
+                    </form>
+                </td>
+                <td class="text-end" th:text="${c.productCount}">0</td>
+                <td class="text-end">
+                    <form th:action="@{/admin/categories/{id}/delete(id=${c.id})}" method="post">
+                        <button class="btn btn-link btn-sm text-danger" type="submit" th:disabled="${c.productCount > 0}"
+                                th:title="${c.productCount > 0} ? 'Move or hide its products first'">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<ul th:fragment="nav(active)" class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link" th:classappend="${active == 'orders'} ? 'active'" th:href="@{/admin/orders}">Orders</a></li>
+    <li class="nav-item"><a class="nav-link" th:classappend="${active == 'products'} ? 'active'" th:href="@{/admin/products}">Products</a></li>
+    <li class="nav-item"><a class="nav-link" th:classappend="${active == 'categories'} ? 'active'" th:href="@{/admin/categories}">Categories</a></li>
+    <li class="nav-item"><a class="nav-link" th:classappend="${active == 'stats'} ? 'active'" th:href="@{/admin/stats}">Sales</a></li>
+</ul>
+</body>
+</html>

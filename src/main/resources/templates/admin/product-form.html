@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${productId == null} ? 'New product' : 'Edit product')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container" style="max-width: 720px">
+    <h1 class="h4 mb-3" th:text="${productId == null} ? 'New product' : 'Edit product'">New product</h1>
+    <form th:action="${productId == null} ? @{/admin/products} : @{/admin/products/{id}(id=${productId})}"
+          th:object="${form}" method="post" novalidate>
+        <div class="mb-3">
+            <label class="form-label" for="name">Name</label>
+            <input class="form-control" id="name" th:field="*{name}" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{name}">Error</div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" id="description" rows="3" th:field="*{description}"
+                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+            <div class="invalid-feedback" th:errors="*{description}">Error</div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-4">
+                <label class="form-label" for="price">Price, UAH</label>
+                <input class="form-control" id="price" type="number" step="0.01" min="0.01" th:field="*{price}"
+                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{price}">Error</div>
+            </div>
+            <div class="col-6 col-md-4">
+                <label class="form-label" for="stock">Stock</label>
+                <input class="form-control" id="stock" type="number" min="0" th:field="*{stock}"
+                       th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{stock}">Error</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <label class="form-label" for="categoryId">Category</label>
+                <select class="form-select" id="categoryId" th:field="*{categoryId}"
+                        th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                    <option value="">Choose…</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}">Category</option>
+                </select>
+                <div class="invalid-feedback" th:errors="*{categoryId}">Error</div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="imageUrl">Image URL (optional)</label>
+            <input class="form-control" id="imageUrl" th:field="*{imageUrl}"
+                   th:classappend="${#fields.hasErrors('imageUrl')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{imageUrl}">Error</div>
+        </div>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-link" th:href="@{/admin/products}">Cancel</a>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

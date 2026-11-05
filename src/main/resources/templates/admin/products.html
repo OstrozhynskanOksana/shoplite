@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Products — Admin')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">Admin panel</h1>
+    <ul th:replace="~{fragments/admin :: nav('products')}"></ul>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-secondary" th:text="${#lists.size(products)} + ' products'">0 products</span>
+        <a class="btn btn-primary btn-sm" th:href="@{/admin/products/new}">New product</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Name</th><th>Category</th><th class="text-end">Price</th><th class="text-end">Stock</th>
+                <th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${products}" th:classappend="${!p.active} ? 'text-secondary'">
+                <td th:text="${p.name}">Product</td>
+                <td th:text="${p.category.name}">Category</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(p.price, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="text-end" th:text="${p.stock}">0</td>
+                <td><span class="badge" th:classappend="${p.active} ? 'text-bg-success' : 'text-bg-secondary'"
+                          th:text="${p.active} ? 'Visible' : 'Hidden'">Visible</span></td>
+                <td class="text-end text-nowrap">
+                    <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/products/{id}/edit(id=${p.id})}">Edit</a>
+                    <form th:action="@{/admin/products/{id}/toggle(id=${p.id})}" method="post" class="d-inline">
+                        <button class="btn btn-link btn-sm" type="submit" th:text="${p.active} ? 'Hide' : 'Show'">Hide</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
