@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<span th:fragment="badge(status)" class="badge"
+      th:classappend="${status.name() == 'CANCELLED'} ? 'text-bg-secondary' : (${status.name() == 'DELIVERED'} ? 'text-bg-success' : (${status.name() == 'NEW'} ? 'text-bg-warning' : 'text-bg-primary'))"
+      th:text="${status.title}">New</span>
+</body>
+</html>

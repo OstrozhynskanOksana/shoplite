@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My orders')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">My orders</h1>
+    <p th:if="${#lists.isEmpty(orders)}" class="text-secondary">
+        You have no orders yet. <a th:href="@{/products}">Go to the catalog</a>
+    </p>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(orders)}">
+        <table class="table align-middle">
+            <thead><tr><th>Order</th><th>Date</th><th>Status</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+            <tr th:each="o : ${orders}">
+                <td><a th:href="@{/orders/{id}(id=${o.id})}" th:text="'#' + ${o.id}">#1</a></td>
+                <td th:text="${#temporals.format(o.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026 12:00</td>
+                <td><span th:replace="~{fragments/status :: badge(${o.status})}"></span></td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(o.total, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
