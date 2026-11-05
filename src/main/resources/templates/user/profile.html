@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profile')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-1">Profile</h1>
+    <p class="text-secondary" th:text="${email}">user@example.com</p>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+    <div class="row g-4">
+        <div class="col-12 col-md-6">
+            <h2 class="h6">Personal details</h2>
+            <form th:action="@{/profile}" th:object="${profileForm}" method="post" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="fullName">Name</label>
+                    <input class="form-control" id="fullName" th:field="*{fullName}"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{fullName}">Error</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="phone">Phone</label>
+                    <input class="form-control" id="phone" th:field="*{phone}" placeholder="+380 67 123 4567"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{phone}">Error</div>
+                </div>
+                <button class="btn btn-primary" type="submit">Save</button>
+            </form>
+        </div>
+        <div class="col-12 col-md-6">
+            <h2 class="h6">Change password</h2>
+            <form th:action="@{/profile/password}" th:object="${passwordForm}" method="post" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="currentPassword">Current password</label>
+                    <input class="form-control" type="password" id="currentPassword" th:field="*{currentPassword}"
+                           th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{currentPassword}">Error</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="newPassword">New password (at least 8 characters)</label>
+                    <input class="form-control" type="password" id="newPassword" th:field="*{newPassword}"
+                           th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{newPassword}">Error</div>
+                </div>
+                <button class="btn btn-outline-primary" type="submit">Change password</button>
+            </form>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
