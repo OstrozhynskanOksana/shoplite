@@ -7,4 +7,10 @@ public interface UserService {
     User register(RegistrationForm form);
 
     User getByEmail(String email);
+
+    /** Updates name and phone (FR-11). */
+    void updateProfile(String email, ProfileForm form);
+
+    /** Changes the password after checking the current one (FR-11). */
+    void changePassword(String email, PasswordChangeForm form);
 }
