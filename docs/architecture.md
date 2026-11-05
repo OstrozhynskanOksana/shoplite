@@ -24,6 +24,8 @@ Browser ──HTTP──▶ Spring Security ──▶ Controllers (MVC, REST /ap
 | `cart` | customer cart | FR-06 |
 | `order` | checkout, statuses, order history | FR-07 – FR-10, FR-14 |
 | `stats` | sales statistics | FR-15 |
+| `admin` | admin panel controllers | FR-12 – FR-15 |
+| `api` | REST API (JSON) | FR-03 – FR-05, FR-14 |
 | `config` | security | NFR-02, NFR-03 |
 | `common` | exceptions and error handling | NFR-05 |
 
@@ -34,6 +36,11 @@ Browser ──HTTP──▶ Spring Security ──▶ Controllers (MVC, REST /ap
 - **Price at purchase** is stored in `OrderItem.priceAtPurchase`, so later price changes do not affect past orders.
 - **Products are never deleted**, only deactivated with the `active` flag.
 - **Status transitions** are encapsulated in `OrderStatus.canChangeTo()` (order state diagram).
+
+## Deployment
+
+`docker-compose.yml` starts two containers: `db` (PostgreSQL 16 with the `pgdata` volume) and `app`
+(the Spring Boot jar on a JRE image, `postgres` profile). The app starts only after the database health check passes.
 
 ## Database schema
 

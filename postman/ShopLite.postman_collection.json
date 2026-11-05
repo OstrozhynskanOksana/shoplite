@@ -1,0 +1,259 @@
+{
+  "info": {
+    "name": "ShopLite API",
+    "description": "Integration checks for the ShopLite REST API. Run the app first (IntelliJ \"ShopLite run\" or docker compose up), then run the collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "List products",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products",
+        "description": "FR-03: first page of the catalog"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response time is below 2 s (NFR-01)\", () => pm.expect(pm.response.responseTime).to.be.below(2000));",
+              "const body = pm.response.json();",
+              "pm.test(\"At most 12 products per page (FR-03)\", () => pm.expect(body.items.length).to.be.at.most(12));",
+              "pm.test(\"Only products with price > 0\", () => body.items.forEach(p => pm.expect(p.price).to.be.above(0)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search by name",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products?q=kettle",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const items = pm.response.json().items;",
+              "pm.test(\"Every result matches the query (FR-04)\", () => items.forEach(p => pm.expect(p.name.toLowerCase()).to.include(\"kettle\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Filter by category, sort by price desc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products?category=1&sort=price_desc",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const items = pm.response.json().items;",
+              "pm.test(\"All products are in category 1 (FR-04)\", () => items.forEach(p => pm.expect(p.categoryId).to.eql(1)));",
+              "pm.test(\"Sorted by price, highest first (FR-04)\", () => {",
+              "  for (let i = 1; i < items.length; i++) pm.expect(items[i - 1].price).to.be.at.least(items[i].price);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get product by id",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products/1",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const p = pm.response.json();",
+              "pm.test(\"Product has the fields shown on the product page (FR-05)\", () => {",
+              "  pm.expect(p).to.include.keys(\"id\", \"name\", \"description\", \"price\", \"stock\", \"categoryName\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unknown product returns 404",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products/999999",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error is JSON with a message\", () => pm.expect(pm.response.json().error).to.be.a(\"string\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid parameter returns 400",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/products?category=abc",
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400 (NFR-05)\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order status requires authentication",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/orders/1/status",
+        "description": "",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401 without credentials (NFR-03)\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order status as admin",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/orders/1/status",
+        "description": "Place at least one order in the web UI before running this request",
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "{{adminEmail}}",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{adminPassword}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const o = pm.response.json();",
+              "pm.test(\"Status is one of the known values (FR-14)\", () => pm.expect([\"NEW\",\"CONFIRMED\",\"SHIPPED\",\"DELIVERED\",\"CANCELLED\"]).to.include(o.status));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@shoplite.local"
+    },
+    {
+      "key": "adminPassword",
+      "value": "admin12345"
+    }
+  ]
+}
