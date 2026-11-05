@@ -17,16 +17,16 @@
             <tbody>
             <tr th:each="c : ${categories}">
                 <td>
-                    <form th:action="@{/admin/categories/{id}/rename(id=${c.id})}" method="post" class="d-flex gap-2" style="max-width: 360px">
-                        <input class="form-control form-control-sm" name="name" th:value="${c.name}" maxlength="100" required aria-label="Category name">
+                    <form th:action="@{/admin/categories/{id}/rename(id=${c.id()})}" method="post" class="d-flex gap-2" style="max-width: 360px">
+                        <input class="form-control form-control-sm" name="name" th:value="${c.name()}" maxlength="100" required aria-label="Category name">
                         <button class="btn btn-outline-secondary btn-sm" type="submit">Rename</button>
                     </form>
                 </td>
-                <td class="text-end" th:text="${c.productCount}">0</td>
+                <td class="text-end" th:text="${c.productCount()}">0</td>
                 <td class="text-end">
-                    <form th:action="@{/admin/categories/{id}/delete(id=${c.id})}" method="post">
-                        <button class="btn btn-link btn-sm text-danger" type="submit" th:disabled="${c.productCount > 0}"
-                                th:title="${c.productCount > 0} ? 'Move or hide its products first'">Delete</button>
+                    <form th:action="@{/admin/categories/{id}/delete(id=${c.id()})}" method="post">
+                        <button class="btn btn-link btn-sm text-danger" type="submit" th:disabled="${c.productCount() > 0}"
+                                th:title="${c.productCount() > 0} ? 'Move or hide its products first'">Delete</button>
                     </form>
                 </td>
             </tr>

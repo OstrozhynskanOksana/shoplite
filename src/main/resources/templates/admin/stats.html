@@ -14,13 +14,13 @@
         <div class="col-6">
             <div class="border rounded p-3">
                 <div class="small text-secondary">Orders</div>
-                <div class="fs-3 fw-semibold" th:text="${sales.ordersCount}">0</div>
+                <div class="fs-3 fw-semibold" th:text="${sales.ordersCount()}">0</div>
             </div>
         </div>
         <div class="col-6">
             <div class="border rounded p-3">
                 <div class="small text-secondary">Revenue, UAH</div>
-                <div class="fs-3 fw-semibold" th:text="${#numbers.formatDecimal(sales.revenue, 1, 'COMMA', 2, 'POINT')}">0.00</div>
+                <div class="fs-3 fw-semibold" th:text="${#numbers.formatDecimal(sales.revenue(), 1, 'COMMA', 2, 'POINT')}">0.00</div>
             </div>
         </div>
     </div>
