@@ -14,5 +14,9 @@ public interface OrderService {
     /** Status change by an administrator (FR-14). */
     void changeStatus(Long orderId, OrderStatus status);
 
+    /** Order history of a customer, newest first (FR-09). */
     List<Order> findByUser(Long userId);
+
+    /** Order details for its owner; other users get "not found" (FR-09). */
+    Order getForUser(Long orderId, Long userId);
 }

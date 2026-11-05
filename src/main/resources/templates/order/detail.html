@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Order #' + ${order.id})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <a th:href="@{/orders}" class="small">← My orders</a>
+    <div class="d-flex align-items-center gap-3 mt-2 mb-3">
+        <h1 class="h4 mb-0" th:text="'Order #' + ${order.id}">Order #1</h1>
+        <span th:replace="~{fragments/status :: badge(${order.status})}"></span>
+    </div>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+    <p class="mb-1"><span class="text-secondary">Placed:</span>
+        <span th:text="${#temporals.format(order.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</span></p>
+    <p class="mb-1"><span class="text-secondary">Delivery address:</span> <span th:text="${order.deliveryAddress}">Address</span></p>
+    <p class="mb-3"><span class="text-secondary">Phone:</span> <span th:text="${order.phone}">Phone</span></p>
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Product</th><th class="text-end">Price</th><th class="text-end">Qty</th><th class="text-end">Subtotal</th></tr></thead>
+            <tbody>
+            <tr th:each="item : ${order.items}">
+                <td th:text="${item.product.name}">Product</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(item.priceAtPurchase, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                <td class="text-end" th:text="${item.quantity}">1</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="fs-5 fw-semibold text-end">Total:
+        <span th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</span></p>
+    <form th:if="${order.status.name() == 'NEW'}" th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post">
+        <button class="btn btn-outline-danger" type="submit">Cancel order</button>
+    </form>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

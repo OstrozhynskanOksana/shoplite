@@ -82,8 +82,19 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Order getForUser(Long orderId, Long userId) {
+        Order order = orderRepository.findWithItemsById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        if (!order.getUser().getId().equals(userId)) {
+            throw new NotFoundException("Order not found");
+        }
+        return order;
+    }
+
     private Order getOrder(Long orderId) {
-        return orderRepository.findById(orderId)
+        return orderRepository.findWithItemsById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
     }
 
