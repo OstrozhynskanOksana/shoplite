@@ -1,0 +1,11 @@
+.product-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 140px;
+    background: #eef3fa;
+    color: #3b5b8a;
+    font-size: .9rem;
+}
+.product-thumb-lg { height: 280px; font-size: 1.2rem; }
+.auth-box { max-width: 420px; }
