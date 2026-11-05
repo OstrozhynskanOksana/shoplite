@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cart')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <h1 class="h4 mb-3">Cart</h1>
+    <div th:replace="~{fragments/messages :: flash}"></div>
+
+    <p th:if="${cart.empty}" class="text-secondary">
+        Your cart is empty. <a th:href="@{/products}">Go to the catalog</a>
+    </p>
+
+    <div th:unless="${cart.empty}">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr><th>Product</th><th class="text-end">Price</th><th style="width: 190px">Quantity</th>
+                    <th class="text-end">Subtotal</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${cart.items}">
+                    <td><a th:href="@{/products/{id}(id=${item.product.id})}" th:text="${item.product.name}">Product</a></td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(item.product.price, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</td>
+                    <td>
+                        <form th:action="@{/cart/items/{id}(id=${item.product.id})}" method="post" class="d-flex gap-2">
+                            <input class="form-control form-control-sm" type="number" name="quantity" min="1"
+                                   th:max="${item.product.stock}" th:value="${item.quantity}" aria-label="Quantity">
+                            <button class="btn btn-outline-secondary btn-sm" type="submit">Update</button>
+                        </form>
+                    </td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</td>
+                    <td class="text-end">
+                        <form th:action="@{/cart/items/{id}/remove(id=${item.product.id})}" method="post">
+                            <button class="btn btn-link btn-sm text-danger" type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="fs-5 fw-semibold mb-0">Total:
+                <span th:text="${#numbers.formatDecimal(cart.total, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</span></p>
+            <a class="btn btn-primary" th:href="@{/checkout}">Checkout</a>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.shoplite.cart;
 
 import com.shoplite.catalog.CatalogService;
 import com.shoplite.catalog.Product;
+import com.shoplite.common.exception.BusinessException;
 import com.shoplite.common.exception.NotFoundException;
 import com.shoplite.user.UserRepository;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,10 @@ public class CartServiceImpl implements CartService {
         this.catalogService = catalogService;
     }
 
-    /** Returns the user's cart, creating it on first access. */
+    /** Returns the user's cart with its items, creating an empty cart on first access. */
     @Override
     public Cart getCart(Long userId) {
-        return cartRepository.findByUserId(userId).orElseGet(() -> cartRepository.save(
+        return cartRepository.findWithItemsByUserId(userId).orElseGet(() -> cartRepository.save(
                 new Cart(userRepository.findById(userId)
                         .orElseThrow(() -> new NotFoundException("User not found")))));
     }
@@ -33,12 +34,20 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addItem(Long userId, Long productId, int quantity) {
         Product product = catalogService.getActiveProduct(productId);
-        getCart(userId).addItem(product, quantity);
+        Cart cart = getCart(userId);
+        checkStock(product, cart.quantityOf(productId) + quantity);
+        cart.addItem(product, quantity);
     }
 
     @Override
     public void changeQuantity(Long userId, Long productId, int quantity) {
-        getCart(userId).changeQuantity(productId, quantity);
+        Cart cart = getCart(userId);
+        cart.getItem(productId).ifPresent(item -> {
+            if (quantity > 0) {
+                checkStock(item.getProduct(), quantity);
+            }
+            cart.changeQuantity(productId, quantity);
+        });
     }
 
     @Override
@@ -49,5 +58,12 @@ public class CartServiceImpl implements CartService {
     @Override
     public void clear(Long userId) {
         getCart(userId).clear();
+    }
+
+    private static void checkStock(Product product, int wantedQuantity) {
+        if (wantedQuantity > product.getStock()) {
+            throw new BusinessException("Only " + product.getStock() + " pcs of \"" + product.getName()
+                    + "\" left in stock");
+        }
     }
 }

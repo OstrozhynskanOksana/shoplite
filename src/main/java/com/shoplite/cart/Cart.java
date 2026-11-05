@@ -70,6 +70,20 @@ public class Cart {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** Returns the cart line for the given product, if the product is in the cart. */
+    public Optional<CartItem> getItem(Long productId) {
+        return findItem(productId);
+    }
+
+    /** Quantity of the given product already in the cart (0 if absent). */
+    public int quantityOf(Long productId) {
+        return findItem(productId).map(CartItem::getQuantity).orElse(0);
+    }
+
+    public int getTotalQuantity() {
+        return items.stream().mapToInt(CartItem::getQuantity).sum();
+    }
+
     private Optional<CartItem> findItem(Long productId) {
         return items.stream()
                 .filter(item -> item.getProduct().getId().equals(productId))

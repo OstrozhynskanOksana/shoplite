@@ -16,7 +16,16 @@
             <p th:text="${product.description}">Product description</p>
             <p th:classappend="${product.inStock} ? 'text-success' : 'text-danger'"
                th:text="${product.inStock} ? 'In stock: ' + ${product.stock} + ' pcs' : 'Out of stock'">In stock</p>
-            <p class="small text-secondary">Adding to cart will be available in Sprint 2.</p>
+            <div th:replace="~{fragments/messages :: flash}"></div>
+            <form th:if="${currentUserEmail != null and product.inStock}" th:action="@{/cart/add}" method="post"
+                  class="d-flex gap-2" style="max-width: 260px">
+                <input type="hidden" name="productId" th:value="${product.id}">
+                <input class="form-control" type="number" name="quantity" value="1" min="1" th:max="${product.stock}"
+                       aria-label="Quantity">
+                <button class="btn btn-primary text-nowrap" type="submit">Add to cart</button>
+            </form>
+            <p th:if="${currentUserEmail == null}" class="small">
+                <a th:href="@{/login}">Log in</a> to add this product to your cart.</p>
         </div>
     </div>
 </main>
