@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${product.name})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: header}"></nav>
+<main class="container">
+    <a th:href="@{/products}" class="small">← Back to catalog</a>
+    <div class="row g-4 mt-1">
+        <div class="col-12 col-md-5">
+            <div class="product-thumb product-thumb-lg rounded" th:text="${product.category.name}">Category</div>
+        </div>
+        <div class="col-12 col-md-7">
+            <p class="text-secondary small mb-1" th:text="${product.category.name}">Category</p>
+            <h1 class="h3" th:text="${product.name}">Product name</h1>
+            <p class="fs-4 fw-semibold" th:text="${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')} + ' UAH'">0.00 UAH</p>
+            <p th:text="${product.description}">Product description</p>
+            <p th:classappend="${product.inStock} ? 'text-success' : 'text-danger'"
+               th:text="${product.inStock} ? 'In stock: ' + ${product.stock} + ' pcs' : 'Out of stock'">In stock</p>
+            <p class="small text-secondary">Adding to cart will be available in Sprint 2.</p>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
