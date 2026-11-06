@@ -3,13 +3,14 @@ package com.shoplite.order;
 import com.shoplite.cart.Cart;
 import com.shoplite.cart.CartService;
 import com.shoplite.catalog.Product;
-import com.shoplite.catalog.ProductRepository;
 import com.shoplite.common.exception.BusinessException;
 import com.shoplite.common.exception.EmptyCartException;
 import com.shoplite.common.exception.IllegalStatusTransitionException;
 import com.shoplite.common.exception.NotFoundException;
 import com.shoplite.common.exception.OutOfStockException;
 import com.shoplite.user.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,9 @@ import static org.mockito.Mockito.*;
 class OrderServiceImplTest {
 
     private final OrderRepository orderRepository = mock(OrderRepository.class);
-    private final ProductRepository productRepository = mock(ProductRepository.class);
     private final CartService cartService = mock(CartService.class);
-    private final OrderService service = new OrderServiceImpl(orderRepository, productRepository, cartService);
+    private final EntityManager entityManager = mock(EntityManager.class);
+    private final OrderService service = new OrderServiceImpl(orderRepository, cartService, entityManager);
 
     private User buyer;
     private Cart cart;
@@ -45,8 +46,6 @@ class OrderServiceImplTest {
         kettle = product(10L, "Kettle", "899.00", 4);
         mop = product(20L, "Mop", "980.00", 5);
         when(cartService.getCart(1L)).thenReturn(cart);
-        when(productRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(kettle));
-        when(productRepository.findByIdForUpdate(20L)).thenReturn(Optional.of(mop));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
     }
 
@@ -116,6 +115,24 @@ class OrderServiceImplTest {
 
         verify(orderRepository, never()).save(any());
         verify(cartService, never()).clear(any());
+    }
+
+    @Test
+    @DisplayName("SCRUM-38: every product is locked and read again before its stock is checked")
+    void stockIsCheckedOnFreshLockedData() {
+        cart.addItem(kettle, 1);
+        cart.addItem(mop, 2);
+        // another customer bought mops while this cart was open; the database row now says 1
+        doAnswer(inv -> {
+            mop.setStock(1);
+            return null;
+        }).when(entityManager).refresh(mop, LockModeType.PESSIMISTIC_WRITE);
+
+        assertThrows(OutOfStockException.class, () -> service.placeOrder(1L, form()));
+
+        verify(entityManager).refresh(kettle, LockModeType.PESSIMISTIC_WRITE);
+        verify(entityManager).refresh(mop, LockModeType.PESSIMISTIC_WRITE);
+        verify(orderRepository, never()).save(any());
     }
 
     @Test

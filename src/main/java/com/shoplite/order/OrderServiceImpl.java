@@ -4,11 +4,12 @@ import com.shoplite.cart.Cart;
 import com.shoplite.cart.CartItem;
 import com.shoplite.cart.CartService;
 import com.shoplite.catalog.Product;
-import com.shoplite.catalog.ProductRepository;
 import com.shoplite.common.exception.BusinessException;
 import com.shoplite.common.exception.EmptyCartException;
 import com.shoplite.common.exception.NotFoundException;
 import com.shoplite.common.exception.OutOfStockException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,18 +19,17 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
     private final CartService cartService;
+    private final EntityManager entityManager;
 
-    public OrderServiceImpl(OrderRepository orderRepository, ProductRepository productRepository,
-                            CartService cartService) {
+    public OrderServiceImpl(OrderRepository orderRepository, CartService cartService, EntityManager entityManager) {
         this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
         this.cartService = cartService;
+        this.entityManager = entityManager;
     }
 
     /**
-     * Follows the "Place order" sequence diagram: products are read with a row lock,
+     * Follows the "Place order" sequence diagram: every product row is locked and read again,
      * and if any product is out of stock the whole transaction is rolled back.
      */
     @Override
@@ -41,9 +41,13 @@ public class OrderServiceImpl implements OrderService {
         }
         Order order = new Order(cart.getUser(), form.getDeliveryAddress().trim(), form.getPhone().trim());
         for (CartItem item : cart.getItems()) {
-            Product product = productRepository.findByIdForUpdate(item.getProduct().getId())
-                    .filter(Product::isActive)
-                    .orElseThrow(() -> new OutOfStockException(item.getProduct().getName()));
+            Product product = item.getProduct();
+            // Lock the product row and read it again. The cart has already loaded this product, so a locking
+            // query would return that copy with the stock it had before a parallel order was saved (SCRUM-38).
+            entityManager.refresh(product, LockModeType.PESSIMISTIC_WRITE);
+            if (!product.isActive()) {
+                throw new OutOfStockException(product.getName());
+            }
             product.decreaseStock(item.getQuantity());
             order.addItem(new OrderItem(product, item.getQuantity()));
         }

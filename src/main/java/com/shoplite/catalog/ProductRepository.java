@@ -1,11 +1,9 @@
 package com.shoplite.catalog;
 
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,11 +29,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @EntityGraph(attributePaths = "category")
     Optional<Product> findByIdAndActiveTrue(Long id);
-
-    /** Reads a product with a row lock for order placement (NFR-04). */
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from Product p where p.id = :id")
-    Optional<Product> findByIdForUpdate(@Param("id") Long id);
 
     /** All products, including deactivated ones, for the admin panel (FR-12). */
     @EntityGraph(attributePaths = "category")
