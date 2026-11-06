@@ -1,6 +1,7 @@
 package com.shoplite.catalog;
 
 import com.shoplite.support.IntegrationTestSupport;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,6 +63,22 @@ class CatalogSearchIntegrationTest extends IntegrationTestSupport {
         assertEquals(13, first.getTotalElements());
         assertEquals(2, first.getTotalPages());
         assertEquals(List.of("Item 13"), names(second));
+    }
+
+    @Test
+    @DisplayName("SCRUM-39: % and _ typed in the search box are matched as plain characters")
+    void wildcardCharactersAreMatchedLiterally() {
+        Category category = newCategory();
+        newProduct("Cotton towel 100%", "199.00", 5, category.getId());
+        newProduct("Cotton towel 70x140", "249.00", 5, category.getId());
+        newProduct("Box_set of cups", "320.00", 5, category.getId());
+        newProduct("Box set of plates", "350.00", 5, category.getId());
+
+        Page<Product> percent = catalogService.findProducts(new CatalogFilter("%", category.getId(), null, 0));
+        Page<Product> underscore = catalogService.findProducts(new CatalogFilter("box_set", category.getId(), null, 0));
+
+        assertEquals(List.of("Cotton towel 100%"), names(percent));
+        assertEquals(List.of("Box_set of cups"), names(underscore));
     }
 
     @Test
