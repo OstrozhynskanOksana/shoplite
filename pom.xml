@@ -17,6 +17,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <jacoco-plugin.version>0.8.13</jacoco-plugin.version>
     </properties>
 
     <dependencies>
@@ -107,6 +108,51 @@
                                 </requireMavenVersion>
                                 <dependencyConvergence/>
                                 <banDuplicatePomDependencyVersions/>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Test coverage report (target/site/jacoco/index.html).
+                 NFR-07: "mvn verify" fails if a service class has less than 70 % of its lines covered. -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>check-service-coverage</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <includes>
+                                        <include>com.shoplite.*.*ServiceImpl</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.70</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
                             </rules>
                         </configuration>
                     </execution>
