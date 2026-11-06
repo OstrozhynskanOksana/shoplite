@@ -19,7 +19,7 @@ an administrator manages the catalog, processes orders and sees monthly sales.
 | Migrations | Flyway |
 | Build and dependencies | Maven (`pom.xml`, wrapper `mvnw` included) |
 | Containers | Docker, Docker Compose |
-| Tests | JUnit 5, Mockito, Spring Boot Test, Postman |
+| Tests | JUnit Jupiter, Mockito, Spring Boot Test, Spring Security Test, JaCoCo, Postman |
 
 ## Project structure
 
@@ -41,9 +41,9 @@ src/main/resources
 ├── db/migration/                      Flyway migrations (schema and seed data)
 ├── templates/                         Thymeleaf pages
 └── static/css/
-src/test/java/com/shoplite     unit and integration tests
+src/test/java/com/shoplite     unit, component, system and load tests (see docs/testing.md)
 postman/                       Postman collection for the REST API
-docs/                          documentation (architecture)
+docs/                          documentation (architecture, testing)
 .run/                          IntelliJ IDEA run configurations
 Dockerfile, docker-compose.yml
 ```
@@ -112,12 +112,21 @@ Import `postman/ShopLite.postman_collection.json` into Postman and run the colle
 ## Tests
 
 ```bash
-./mvnw test      # all tests
-./mvnw verify    # tests + coverage check: every *ServiceImpl class must have at least 70 % of lines covered (NFR-07)
+./mvnw test                        # all tests, about 1 minute
+./mvnw verify                      # tests + coverage check: every *ServiceImpl class must have at least 70 % of lines covered (NFR-07)
+./mvnw test -Dgroups=performance   # only the NFR-01 load test
 ```
 
-Unit tests (JUnit 5 + Mockito) check every service class in isolation: repositories are replaced with mocks.
+| Level | Tests | What they check |
+|---|---|---|
+| Unit (JUnit + Mockito) | 65 | every service class and domain object in isolation, repositories replaced with mocks |
+| Component (`@SpringBootTest` + MockMvc, H2) | 33 | services with the database, REST API, access rules, CSRF, form validation, transactions |
+| System | 5 | customer and administrator journeys over HTTP, as a browser does them |
+| Load | 1 | NFR-01: 50 concurrent users on a catalog of 1000 products |
+
+Latest run: 104 tests, all passed; 91 % line and 85 % branch coverage.
 The coverage report is written to `target/site/jacoco/index.html`.
+Test strategy, results, defects found by the tests and requirements validation: [docs/testing.md](docs/testing.md).
 
 ## Requirements status
 
@@ -145,13 +154,13 @@ The coverage report is written to `target/site/jacoco/index.html`.
 
 | Requirement | How it is met |
 |---|---|
-| NFR-01 Performance | paginated catalog, indexes, entity graphs instead of N+1 queries; response time checked in the Postman collection |
+| NFR-01 Performance | paginated catalog, indexes, entity graphs instead of N+1 queries; load test with 50 concurrent users and 1000 products: 95 % of responses under 0.6 s |
 | NFR-02 Password security | BCrypt hashes only |
 | NFR-03 Access control | `/admin/**` for ADMIN only, login required for cart and orders, CSRF on forms, 401 for unauthenticated API calls |
-| NFR-04 Reliable checkout | one transaction with row locks; full rollback when stock is insufficient |
+| NFR-04 Reliable checkout | one transaction; every product row is locked and read again before the stock check; full rollback when stock is insufficient; tested with two parallel orders |
 | NFR-05 Input validation | Bean Validation on every form, readable messages next to fields, JSON errors in the API |
 | NFR-06 UI | Bootstrap 5 responsive layout (360 px – 1920 px), English UI |
-| NFR-07 Test coverage | unit and integration tests (extended in Lab 6) |
+| NFR-07 Test coverage | 104 unit, component, system and load tests; 91 % line coverage, every service class at least 70 % (checked by `./mvnw verify`) |
 | NFR-08 One-command deployment | `docker compose up --build` |
 
 ## Team and roles
