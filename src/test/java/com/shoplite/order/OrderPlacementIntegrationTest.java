@@ -10,6 +10,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import static com.shoplite.support.TestData.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,6 +79,45 @@ class OrderPlacementIntegrationTest extends IntegrationTestSupport {
         assertEquals(1, stockOf(scarce.getId()));
         assertTrue(orderService.findByUser(buyer.getId()).isEmpty());
         assertEquals(2, cartService.getCart(buyer.getId()).getItems().size(), "the cart is kept");
+    }
+
+    @Test
+    @DisplayName("NFR-04: two customers order the last item at the same time — only one succeeds")
+    void lastItemCannotBeSoldTwice() throws Exception {
+        Product lastOne = newProduct("500.00", 1);
+        User first = newCustomer();
+        User second = newCustomer();
+        cartService.addItem(first.getId(), lastOne.getId(), 1);
+        cartService.addItem(second.getId(), lastOne.getId(), 1);
+
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        List<Future<Order>> results = new ArrayList<>();
+        for (User buyer : List.of(first, second)) {
+            Callable<Order> task = () -> {
+                start.await();
+                return orderService.placeOrder(buyer.getId(), checkout());
+            };
+            results.add(pool.submit(task));
+        }
+        start.countDown();
+
+        int succeeded = 0;
+        List<Throwable> failures = new ArrayList<>();
+        for (Future<Order> result : results) {
+            try {
+                result.get(30, TimeUnit.SECONDS);
+                succeeded++;
+            } catch (ExecutionException ex) {
+                failures.add(ex.getCause());
+            }
+        }
+        pool.shutdown();
+
+        assertEquals(1, succeeded, "exactly one order must be placed");
+        assertEquals(1, failures.size(), "the second order must be rejected");
+        assertInstanceOf(OutOfStockException.class, failures.get(0), "the customer is told the item is sold out");
+        assertEquals(0, stockOf(lastOne.getId()), "stock must never go below zero");
     }
 
     @Test
