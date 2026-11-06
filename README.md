@@ -101,6 +101,14 @@ Environment variables: `DB_URL` (default `jdbc:postgresql://localhost:5432/shopl
 Errors are returned as JSON `{"status": 404, "error": "Product not found"}`.
 Import `postman/ShopLite.postman_collection.json` into Postman and run the collection to check the API.
 
+## Dependency management
+
+- All library versions come from the Spring Boot parent (`spring-boot-starter-parent` 4.1.1), so `pom.xml` lists dependencies without versions and they always match each other.
+- Scopes keep the jar small: database drivers are `runtime`, test libraries are `test`, DevTools is `optional`.
+- `maven-enforcer-plugin` runs in the `validate` phase and fails the build if two libraries pull different versions of the same dependency (`dependencyConvergence`), if a dependency is declared twice, or if the JDK is older than 21 / Maven older than 3.9.
+- To inspect the resolved versions run `./mvnw dependency:tree` (IntelliJ IDEA: run configuration **ShopLite dependency tree**).
+- Runtime dependencies are pinned in `Dockerfile` (`maven:3.9-eclipse-temurin-21`, `eclipse-temurin:21-jre`) and `docker-compose.yml` (`postgres:16-alpine`).
+
 ## Tests
 
 ```bash
