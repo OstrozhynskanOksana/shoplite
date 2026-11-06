@@ -112,8 +112,12 @@ Import `postman/ShopLite.postman_collection.json` into Postman and run the colle
 ## Tests
 
 ```bash
-./mvnw test
+./mvnw test      # all tests
+./mvnw verify    # tests + coverage check: every *ServiceImpl class must have at least 70 % of lines covered (NFR-07)
 ```
+
+Unit tests (JUnit 5 + Mockito) check every service class in isolation: repositories are replaced with mocks.
+The coverage report is written to `target/site/jacoco/index.html`.
 
 ## Requirements status
 
