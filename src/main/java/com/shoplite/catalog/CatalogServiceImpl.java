@@ -24,7 +24,15 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public Page<Product> findProducts(CatalogFilter filter) {
         PageRequest pageRequest = PageRequest.of(filter.page(), PAGE_SIZE, toSort(filter.sort()));
-        return productRepository.searchActive(filter.query(), filter.categoryId(), pageRequest);
+        return productRepository.searchActive(escapeLike(filter.query()), filter.categoryId(), pageRequest);
+    }
+
+    /**
+     * Escapes the LIKE wildcards, so "%" and "_" typed by a customer are searched as plain characters
+     * (SCRUM-39). The search query declares '\' as its escape character.
+     */
+    static String escapeLike(String text) {
+        return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
     @Override

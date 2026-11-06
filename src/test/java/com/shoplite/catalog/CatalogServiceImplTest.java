@@ -1,6 +1,7 @@
 package com.shoplite.catalog;
 
 import com.shoplite.common.exception.NotFoundException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /** Unit tests for catalog browsing (FR-03 – FR-05). */
@@ -36,6 +38,16 @@ class CatalogServiceImplTest {
         assertEquals(1, page.getValue().getPageNumber());
         assertEquals(12, page.getValue().getPageSize());
         assertEquals(Sort.by("name").ascending(), page.getValue().getSort());
+    }
+
+    @Test
+    @DisplayName("SCRUM-39: LIKE wildcards in the search text are escaped")
+    void likeWildcardsAreEscaped() {
+        when(productRepository.searchActive(anyString(), any(), any(Pageable.class))).thenReturn(Page.empty());
+
+        service.findProducts(new CatalogFilter("50%_off\\", null, null, 0));
+
+        verify(productRepository).searchActive(eq("50\\%\\_off\\\\"), isNull(), any(Pageable.class));
     }
 
     @Test

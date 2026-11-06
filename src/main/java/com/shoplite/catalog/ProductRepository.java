@@ -14,13 +14,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
      * Searches active products with optional name and category filters (FR-03, FR-04).
-     * An empty name means "no name filter".
+     * An empty name means "no name filter". The name must have its LIKE wildcards escaped with '\'.
      */
     @EntityGraph(attributePaths = "category")
     @Query("""
             select p from Product p
             where p.active = true
-              and lower(p.name) like lower(concat('%', :name, '%'))
+              and lower(p.name) like lower(concat('%', :name, '%')) escape '\\'
               and (:categoryId is null or p.category.id = :categoryId)
             """)
     Page<Product> searchActive(@Param("name") String name,
