@@ -35,7 +35,7 @@ public class CartServiceImpl implements CartService {
     public void addItem(Long userId, Long productId, int quantity) {
         Product product = catalogService.getActiveProduct(productId);
         Cart cart = getCart(userId);
-        checkStock(product, cart.quantityOf(productId) + quantity);
+        checkStock(product, cart.quantityOf(productId), quantity);
         cart.addItem(product, quantity);
     }
 
@@ -44,7 +44,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = getCart(userId);
         cart.getItem(productId).ifPresent(item -> {
             if (quantity > 0) {
-                checkStock(item.getProduct(), quantity);
+                checkStock(item.getProduct(), 0, quantity);
             }
             cart.changeQuantity(productId, quantity);
         });
@@ -60,8 +60,12 @@ public class CartServiceImpl implements CartService {
         getCart(userId).clear();
     }
 
-    private static void checkStock(Product product, int wantedQuantity) {
-        if (wantedQuantity > product.getStock()) {
+    /**
+     * Checks that {@code toAdd} more items fit into the stock when {@code alreadyInCart} are already reserved.
+     * The two numbers are not added together, so a huge quantity cannot overflow int (SCRUM-37).
+     */
+    private static void checkStock(Product product, int alreadyInCart, int toAdd) {
+        if (toAdd > product.getStock() - alreadyInCart) {
             throw new BusinessException("Only " + product.getStock() + " pcs of \"" + product.getName()
                     + "\" left in stock");
         }
