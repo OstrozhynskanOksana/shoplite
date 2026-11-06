@@ -8,6 +8,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CartTest {
@@ -42,5 +43,14 @@ class CartTest {
         cart.addItem(product(1, "100.00"), 1);
         cart.changeQuantity(1L, 0);
         assertTrue(cart.isEmpty());
+    }
+
+    @Test
+    void quantityOverflowIsNotSilentlyAccepted() {
+        Cart cart = new Cart(null);
+        Product kettle = product(1, "899.00");
+        cart.addItem(kettle, 1);
+        assertThrows(ArithmeticException.class, () -> cart.addItem(kettle, Integer.MAX_VALUE));
+        assertEquals(1, cart.getItems().get(0).getQuantity());
     }
 }

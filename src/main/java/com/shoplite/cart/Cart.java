@@ -40,7 +40,7 @@ public class Cart {
             throw new IllegalArgumentException("Quantity must be at least 1");
         }
         findItem(product.getId()).ifPresentOrElse(
-                item -> item.setQuantity(item.getQuantity() + quantity),
+                item -> item.setQuantity(Math.addExact(item.getQuantity(), quantity)),
                 () -> items.add(new CartItem(this, product, quantity)));
     }
 
