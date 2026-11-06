@@ -92,6 +92,17 @@ class CartServiceImplTest {
     }
 
     @Test
+    @DisplayName("SCRUM-37: a huge quantity is rejected instead of overflowing the stock check")
+    void hugeQuantityIsRejected() {
+        service.addItem(1L, 10L, 1);
+
+        assertThrows(BusinessException.class, () -> service.addItem(1L, 10L, Integer.MAX_VALUE));
+
+        assertEquals(1, cart.quantityOf(10L), "the cart must not change");
+        assertMoney("899.00", cart.getTotal());
+    }
+
+    @Test
     void hiddenOrMissingProductCannotBeAdded() {
         when(catalogService.getActiveProduct(11L)).thenThrow(new NotFoundException("Product not found"));
 
